@@ -15,7 +15,7 @@ The N-Queen Solver is a web application that solves the classic N-Queen problem.
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/Vaibhavk121/N-queen-Solver.git
+   git clone https://github.com/rupin2207/N-queen-Solver.git
    cd N-queen-Solver
 
 2. **Run the app.py file :**
