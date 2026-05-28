@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Queen Solver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>N-Queen Solver</h1>
+        <form action="/" method="post">
+            <label for="n-value">Enter the value of N:</label>
+            <input type="number" id="n-value" name="n-value" min="1" required class="input-number">
+            <div class="mode-selection">
+                <label class="switch">
+                    <input type="radio" id="computer" name="mode" value="computer" checked>
+                    <span class="slider"></span>
+                    <span class="label-text">Solve by Computer</span>
+                </label>
+                <label class="switch">
+                    <input type="radio" id="manual" name="mode" value="manual">
+                    <span class="slider"></span>
+                    <span class="label-text">Solve Manually</span>
+                </label>
+            </div>
+            <button type="submit" class="btn">Start</button>
+        </form>
+        {% if solution %}
+            <div class="solution">
+                <h2>Best Solution</h2>
+                <div class="board">
+                    {% for row in solution %}
+                        <div class="row">
+                            {% for cell in row %}
+                                <div class="cell {{ 'queen' if cell == 1 else '' }}">
+                                    {% if cell == 1 %}<img class="queenimg" src="{{ url_for('static', filename='queen.png') }}">{% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% elif n %}
+            <div class="manual-board">
+                <h2>Solve By Yourself</h2>
+                <div class="board" id="board">
+                    {% for i in range(n) %}
+                        <div class="row">
+                            {% for j in range(n) %}
+                                <div class="cell" data-row="{{ i }}" data-col="{{ j }}" onclick="toggleQueen(this)">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div id="status"></div>
+            </div>
+        {% endif %}
+    </div>
+    <script>
+        function toggleQueen(cell) {
+            if (cell.classList.contains('queen')) {
+                cell.classList.remove('queen');
+                cell.innerHTML = '';
+            } else {
+                cell.classList.add('queen');
+                cell.innerHTML = '<img class="queenimg" src="{{ url_for('static', filename='queen.png') }}">';
+            }
+            checkBoard();
+        }
+
+        function getBoardState() {
+            const board = [];
+            const rows = document.querySelectorAll('.row');
+            rows.forEach((row, i) => {
+                const cells = row.querySelectorAll('.cell');
+                const rowState = [];
+                cells.forEach((cell, j) => {
+                    rowState.push(cell.classList.contains('queen') ? 1 : 0);
+                });
+                board.push(rowState);
+            });
+            return board;
+        }
+
+        async function checkBoard() {
+            const board = getBoardState();
+            const response = await fetch('/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ board })
+            });
+            const result = await response.json();
+            const status = document.getElementById('status');
+            if (result.valid) {
+                status.textContent = 'Board is valid so far.';
+                status.style.color = 'green';
+            } else {
+                status.textContent = 'Board is not valid.';
+                status.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>
